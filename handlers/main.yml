@@ -1,0 +1,30 @@
+---
+# Copyright 2017, Logan Vig <logan2211@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Set haproxy service state
+  haproxy:
+    socket: "{{ hostvars[item]['haproxy_admin_socket'] | default(haproxy_admin_socket) }}"
+    backend: "{{ haproxy_backend | default(omit) }}"
+    host: "{{ haproxy_endpoint_name }}"
+    state: "{{ haproxy_state }}"
+    shutdown_sessions: "{{ haproxy_shutdown_sessions | bool }}"
+    wait: "{{ haproxy_wait | bool }}"
+    wait_interval: "{{ haproxy_wait_interval | default(omit) }}"
+    wait_retries: "{{ haproxy_wait_retries | default(omit) }}"
+    weight: "{{ haproxy_weight | default(omit) }}"
+  delegate_to: "{{ item }}"
+  with_items: "{{ haproxy_hosts }}"
+  when: haproxy_management | bool
+  listen: Manage LB
