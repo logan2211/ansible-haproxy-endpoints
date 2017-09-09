@@ -1,0 +1,20 @@
+[all]
+localhost ansible_connection=local ansible_become=True
+
+[haproxy_servers]
+haproxy1 physical_host=localhost
+
+[endpoints]
+endpoint1 ansible_host=10.0.0.1
+endpoint2 ansible_host=10.0.0.2
+
+[empty]
+# No haproxy containers present test
+
+[docker_containers:children]
+haproxy_servers
+
+[docker_containers:vars]
+ansible_connection=docker
+docker_privileged=yes
+docker_user=root

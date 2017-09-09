@@ -1,0 +1,45 @@
+language: python
+# Test this later.
+cache:
+  timeout: 3600
+  pip: true
+  directories:
+    - $HOME/.docker
+# cache: pip
+services:
+  - docker
+env:
+  global:
+    - ANSIBLE_FORCE_COLOR=1
+    - docker_image=quay.io/loganv/docker-ci
+    - docker_command=/lib/systemd/systemd
+    - cache_dir=$HOME/.docker
+  matrix:
+    - TOXENV=linters
+      CACHE_NAME=linters
+    - >
+      TOXENV=functional_2.2
+      docker_image_tag=ubuntu-xenial
+      CACHE_NAME=xenial
+    - >
+      TOXENV=functional_stable
+      docker_image_tag=ubuntu-xenial
+      CACHE_NAME=xenial
+before_install:
+  # Load cached docker images
+  - if [[ -d ${cache_dir} ]]; then ls ${cache_dir}/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
+  - if [[ -n ${docker_image_tag} ]]; then docker pull ${docker_image}:${docker_image_tag}; fi
+install:
+  - pip install tox
+script:
+  - tox
+before_cache:
+  # Save tagged docker images
+  - >
+    mkdir -p ${cache_dir} && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}'
+    | xargs -n 2 -t sh -c 'test -e ${cache_dir}/$1.tar.gz || docker save $0 | gzip -2 > ${cache_dir}/$1.tar.gz'
+notifications:
+  email: false
+  slack:
+    rooms:
+      secure: mOMDDs+dv11vQLX860xLwJkS+1PrTJbnF1872snr7h7E/mSzIMt49IDBrsYuZL7Jp8kIa2rudfesY8KUiPtATHMT2ibDbiuit7SBXLGrkQuzRh8RIeertSC6UD3YAAaJLo7nqCYCPexEdPEeP6Yu6W6fQ0GIWiRTlJEkQYJLk6zyL3sqQY9Ns0D6oe1JMPk23kQ+3QvFOmsula4SYcKXLlzqrfgRX1j5q4OJqTZzXb/+0kEjOpnc7Fc3Hu+AtxrQzmTmWrYFehV8cxiC4OJ1032DQ+/aEfooYFTp/iUcSTZIQgoxB2hC2djx9tfC2KKkUY8mb8I6dpcyjjTfyXRRdphm0+rjg46wRqvRs6RVdoUAHCVKjKNsPbloP/D8S+3seNlQEAK9ROJYulM0lLQxvRC4CWNvbMhqSmO8Mfyf/KLAMrkLRTdplbC1Pw7mHZse/KoO/b2I8xB3y0H4P5N0e9JhLOnR7BPd0pXjGUhHaVqDGkFQm9AA4foa+n/QTVVxYJV4r8SBlXCIiSO2lIJRGA40JKNit3xEL2aelznCbcnUljXip2SkdkHdvpNOwi6X5loJaNIKVGALwSrs1TirhrmwQ7bbNQl5OIPSQXtdDqm/9ObUWeNBf+g4soPLmPZKK0mfm/f1X9DyuYndEGuAJfXGcjKxs9hOnMa1xXiUdjA=

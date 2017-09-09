@@ -1,0 +1,44 @@
+---
+# Copyright 2017, Logan Vig <logan2211@gmail.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+haproxy_admin_socket: /run/haproxy/admin.sock
+
+haproxy_global_stats:
+  sockets:
+    - listen: "{{ haproxy_admin_socket }}"
+      param:
+        - mode 660
+        - level admin
+
+haproxy_listen:
+  - name: testlisten
+    description: Testing
+    bind:
+      - listen: '127.0.0.1:10000'
+    mode: tcp
+    option:
+      - tcplog
+    balance: roundrobin
+    server: |-
+      {% set _var = [] %}
+      {% for host in groups['endpoints'] %}
+      {% set _endpoint = {
+           'name': host,
+           'listen': hostvars[host]['ansible_host'] ~ ':10001',
+         }
+      %}
+      {% set _ = _var.append(_endpoint) %}
+      {% endfor %}
+      {{ _var }}
