@@ -1,0 +1,5 @@
+---
+- name: haproxy
+  scm: git
+  src: https://github.com/Oefenweb/ansible-haproxy
+  version: master

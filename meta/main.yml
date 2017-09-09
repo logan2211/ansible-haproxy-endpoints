@@ -2,7 +2,7 @@ galaxy_info:
   author: Logan V.
   description: Manage haproxy endpoints with handler
   license: Apache2
-  min_ansible_version: 2.1
+  min_ansible_version: 2.2
   galaxy_tags:
     - loadbalancer
     - haproxy
