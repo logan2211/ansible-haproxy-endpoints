@@ -1,5 +1,6 @@
 ---
 # Copyright 2017, Logan Vig <logan2211@gmail.com>
+# Copyright 2017, Major Hayden <major@mhtx.net>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,5 +27,7 @@
     weight: "{{ haproxy_weight | default(omit) }}"
   delegate_to: "{{ item }}"
   with_items: "{{ haproxy_hosts }}"
-  when: haproxy_management | bool
+  when:
+    - haproxy_hosts | default([]) | length > 0
+    - haproxy_management | bool
   listen: Manage LB
