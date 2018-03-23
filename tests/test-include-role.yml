@@ -16,7 +16,7 @@
 - include: test-create-containers.yml
 
 - name: Deploy haproxy servers
-  hosts: haproxy_servers_normal
+  hosts: haproxy_servers_include_role
   roles:
     - haproxy
   post_tasks:
@@ -27,12 +27,17 @@
 - name: Test the endpoint management
   hosts: endpoints
   gather_facts: no
-  roles:
-    - role: "{{ rolename | basename }}"
-      haproxy_state: disabled
-    - testrole
-    - role: "{{ rolename | basename }}"
-      haproxy_state: enabled
+  pre_tasks:
+    - include_role:
+        name: "{{ rolename | basename }}"
+      vars:
+        haproxy_state: disabled
+    - include_role:
+        name: testrole
+    - include_role:
+        name: "{{ rolename | basename }}"
+      vars:
+        haproxy_state: enabled
   post_tasks:
     - name: Ensure the endpoint is enabled
       shell: >
@@ -46,16 +51,4 @@
       failed_when: "haproxy_status.stdout != 'no check'"
       changed_when: false
   vars:
-    haproxy_group: haproxy_servers_normal
-
-- name: Test the endpoint maangement with no haproxy servers
-  hosts: endpoints
-  gather_facts: no
-  roles:
-    - role: "{{ rolename | basename }}"
-      haproxy_state: disabled
-    - testrole
-    - role: "{{ rolename | basename }}"
-      haproxy_state: enabled
-  vars:
-    haproxy_group: empty
+    haproxy_group: haproxy_servers_include_role
