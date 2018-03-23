@@ -1,11 +1,9 @@
 language: python
-# Test this later.
 cache:
   timeout: 3600
   pip: true
   directories:
     - $HOME/.docker
-# cache: pip
 services:
   - docker
 env:
@@ -15,16 +13,51 @@ env:
     - docker_command=/lib/systemd/systemd
     - cache_dir=$HOME/.docker
   matrix:
+    # LINTERS
     - TOXENV=linters
       CACHE_NAME=linters
+    # ANSIBLE 2.3
     - >
-      TOXENV=functional_2.2
+      TOXENV=functional_2.3
       docker_image_tag=ubuntu-xenial
       CACHE_NAME=xenial
+    - >
+      TOXENV=functional_2.3
+      docker_image_tag=centos-7
+      CACHE_NAME=cent7
+    - >
+      TOXENV=functional_2.3
+      docker_image_tag=opensuse-42.2
+      CACHE_NAME=suse42
+      docker_command=/usr/lib/systemd/systemd
+    # ANSIBLE 2.4
+    - >
+      TOXENV=functional_2.4
+      docker_image_tag=ubuntu-xenial
+      CACHE_NAME=xenial
+    - >
+      TOXENV=functional_2.4
+      docker_image_tag=centos-7
+      CACHE_NAME=cent7
+    - >
+      TOXENV=functional_2.4
+      docker_image_tag=opensuse-42.2
+      CACHE_NAME=suse42
+      docker_command=/usr/lib/systemd/systemd
+    # ANSIBLE stable
     - >
       TOXENV=functional_stable
       docker_image_tag=ubuntu-xenial
       CACHE_NAME=xenial
+    - >
+      TOXENV=functional_stable
+      docker_image_tag=centos-7
+      CACHE_NAME=cent7
+    - >
+      TOXENV=functional_stable
+      docker_image_tag=opensuse-42.2
+      CACHE_NAME=suse42
+      docker_command=/usr/lib/systemd/systemd
 before_install:
   # Load cached docker images
   - if [[ -d ${cache_dir} ]]; then ls ${cache_dir}/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
