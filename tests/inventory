@@ -1,8 +1,15 @@
 [all]
 localhost ansible_connection=local ansible_become=True
 
-[haproxy_servers]
+[haproxy_servers:children]
+haproxy_servers_normal
+haproxy_servers_include_role
+
+[haproxy_servers_normal]
 haproxy1 physical_host=localhost
+
+[haproxy_servers_include_role]
+haproxy2 physical_host=localhost
 
 [endpoints]
 endpoint1 ansible_host=10.0.0.1
